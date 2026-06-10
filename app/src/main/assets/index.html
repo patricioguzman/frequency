@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
+<title>Frequency</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#050510;color:#ccc;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:13px}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#0a0a18;border-bottom:1px solid #1a1a30}
+.logo{font-size:20px;font-weight:800;letter-spacing:3px;color:#00e5ff}
+#bpm{font-size:26px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+#tapBtn{font-size:10px;background:#0d0d1a;border:1px solid #333;color:#666;border-radius:4px;padding:4px 8px;cursor:pointer}
+
+.pbar{display:flex;gap:4px;padding:6px 10px;background:#080814;border-bottom:1px solid #1a1a30;overflow-x:auto}
+.pb{flex-shrink:0;padding:8px 12px;font-size:11px;font-weight:600;background:#0d0d1a;border:1px solid #222;border-radius:4px;color:#999;cursor:pointer;text-transform:uppercase}
+.pb.sel{background:#00e5ff;border-color:#00e5ff;color:#000}
+
+.main{flex:1;display:flex}
+.deck{flex:1;display:flex;flex-direction:column;padding:10px 8px;min-width:0}
+.deck:first-child{border-right:1px solid #1a1a30}
+.dlbl{text-align:center;font-size:10px;font-weight:700;letter-spacing:2px;margin-bottom:4px}
+.da .dlbl{color:#00e5ff}.db .dlbl{color:#ff5252}
+
+.btns{display:flex;gap:8px;justify-content:center;margin-bottom:8px}
+.btn{width:44px;height:44px;border-radius:8px;background:#0d0d1a;border:1px solid #222;color:#aaa;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
+.btn.play{width:52px;height:52px;font-size:22px}
+.da .btn.play{border-color:#00e5ff;color:#00e5ff}.db .btn.play{border-color:#ff5252;color:#ff5252}
+.ply .btn.play{background:#00e5ff;color:#000}.db.ply .btn.play{background:#ff5252;color:#000}
+
+.pr{display:flex;align-items:center;gap:4px;margin-bottom:6px}
+.pr span{font-size:9px;color:#555;width:20px;text-align:center}
+.pr .pv{font-size:13px;font-weight:700;width:40px;text-align:center;color:#fff}
+.pr input{-webkit-appearance:none;flex:1;height:5px;border-radius:3px;background:#1a1a30;outline:none}
+.pr input::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #00e5ff;cursor:pointer}
+
+.eq{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
+.eq>div{text-align:center;font-size:8px;color:#555;flex:1;max-width:55px}
+.eq>div label{display:block;margin-bottom:2px;text-transform:uppercase}
+.eq>div input{-webkit-appearance:slider-vertical;width:40px;height:45px;background:#1a1a30;border-radius:3px;outline:none}
+.da .eq>div input::-webkit-slider-thumb{background:#00e5ff}
+.db .eq>div input::-webkit-slider-thumb{background:#ff5252}
+.eq>div input::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%}
+
+.xbar{display:flex;align-items:center;gap:10px;padding:6px 16px;background:#0a0a18;border-top:1px solid #1a1a30;border-bottom:1px solid #1a1a30}
+.xbar span{font-size:10px;font-weight:700;width:14px}.xbar span:first-child{color:#00e5ff}.xbar span:last-child{color:#ff5252}
+.xbar input{-webkit-appearance:none;flex:1;height:8px;border-radius:4px;background:#1a1a30;outline:none}
+.xbar input::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:#fff;border:2px solid #555;cursor:pointer}
+
+.fx{display:flex;gap:6px;padding:6px 10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #1a1a30;background:#080814}
+.fxt{font-size:9px;font-weight:700;color:#00e5ff}
+.fxb{padding:5px 10px;font-size:9px;font-weight:600;border-radius:3px;background:#0d0d1a;border:1px solid #222;color:#999;cursor:pointer;text-transform:uppercase}
+.fxb.on{background:#00e5ff;border-color:#00e5ff;color:#000}
+.fs{display:flex;align-items:center;gap:3px;font-size:9px;color:#555}
+.fs input{-webkit-appearance:none;width:55px;height:4px;background:#1a1a30;border-radius:2px;outline:none}
+.fs input::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#00e5ff}
+
+.bot{display:flex;gap:10px;align-items:center;padding:8px 16px}
+#syncBtn{padding:10px 18px;font-size:12px;font-weight:700;background:transparent;color:#00e5ff;border:2px solid #00e5ff;border-radius:6px;cursor:pointer;letter-spacing:1px;touch-action:manipulation}
+.mas{display:flex;align-items:center;gap:8px;margin-left:auto}
+.mas label{font-size:9px;color:#555;text-transform:uppercase}
+.mas input{-webkit-appearance:none;width:70px;height:5px;background:#1a1a30;border-radius:3px;outline:none}
+.mas input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff}
+#vu{display:flex;gap:2px;height:14px;width:48px}
+#vu div{flex:1;background:#1a1a30;border-radius:1px;min-height:2px}
+
+#err{position:fixed;bottom:4px;left:4px;right:4px;background:#300;color:#f66;padding:8px;border-radius:4px;font-size:10px;display:none;z-index:200;max-height:100px;overflow:auto}
+
+/* ═══ Splash ═══ */
+#splash{position:fixed;inset:0;background:#050510;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s}
+#splash.out{opacity:0;visibility:hidden;pointer-events:none}
+#splash .sl{font-size:32px;font-weight:900;letter-spacing:6px;color:#00e5ff;margin-bottom:10px}
+#splash .st{font-size:10px;color:#444;letter-spacing:4px;text-transform:uppercase;margin-bottom:24px}
+#splash .sbar{display:flex;gap:3px;height:60px;align-items:flex-end}
+#splash .sbar div{width:6px;background:#00e5ff;border-radius:3px;animation:sbar 0.9s ease-in-out infinite alternate}
+#splash .sbar div:nth-child(1){animation-delay:0s;height:30%}
+#splash .sbar div:nth-child(2){animation-delay:0.1s;height:60%}
+#splash .sbar div:nth-child(3){animation-delay:0.2s;height:40%}
+#splash .sbar div:nth-child(4){animation-delay:0.3s;height:80%}
+#splash .sbar div:nth-child(5){animation-delay:0.4s;height:50%}
+#splash .sbar div:nth-child(6){animation-delay:0.5s;height:70%}
+#splash .sbar div:nth-child(7){animation-delay:0.6s;height:45%}
+#splash .sbar div:nth-child(8){animation-delay:0.7s;height:90%}
+@keyframes sbar{0%{transform:scaleY(0.4)}100%{transform:scaleY(1)}}
+</style>
+</head>
+<body>
+
+<div id="splash"><div class="sl">FREQUENCY</div><div class="st">Offline Beatmaker</div><div class="sbar"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+
+<div class="hdr"><div class="logo">FREQUENCY</div><div><span id="bpm">128.0</span> <button id="tapBtn">TAP</button></div></div>
+
+<div class="pbar" id="patBar">
+  <button class="pb sel" data-pat="0">Kicks</button>
+  <button class="pb" data-pat="1">Hats</button>
+  <button class="pb" data-pat="2">Snare</button>
+  <button class="pb" data-pat="3">Bass</button>
+  <button class="pb" data-pat="4">Pad</button>
+</div>
+
+<div class="main">
+  <div class="deck da" id="deckA">
+    <div class="dlbl">DECK A</div>
+    <div class="btns">
+      <button class="btn play" data-act="play">▶</button>
+      <button class="btn" data-act="stop">■</button>
+      <button class="btn" data-act="cue">⏮</button>
+    </div>
+    <div class="pr">
+      <span>-8</span><input type="range" min="-8" max="8" value="0" step="0.1" data-act="pitch"><span>+8</span>
+      <span class="pv" id="pA">0.0%</span>
+    </div>
+    <div class="eq">
+      <div><label>LO</label><input type="range" min="-12" max="12" value="0" data-act="eq-lo" orient="vertical"></div>
+      <div><label>MID</label><input type="range" min="-12" max="12" value="0" data-act="eq-mid" orient="vertical"></div>
+      <div><label>HI</label><input type="range" min="-12" max="12" value="0" data-act="eq-hi" orient="vertical"></div>
+    </div>
+  </div>
+  <div class="deck db" id="deckB">
+    <div class="dlbl">DECK B</div>
+    <div class="btns">
+      <button class="btn play" data-act="play">▶</button>
+      <button class="btn" data-act="stop">■</button>
+      <button class="btn" data-act="cue">⏮</button>
+    </div>
+    <div class="pr">
+      <span>-8</span><input type="range" min="-8" max="8" value="0" step="0.1" data-act="pitch"><span>+8</span>
+      <span class="pv" id="pB">0.0%</span>
+    </div>
+    <div class="eq">
+      <div><label>LO</label><input type="range" min="-12" max="12" value="0" data-act="eq-lo" orient="vertical"></div>
+      <div><label>MID</label><input type="range" min="-12" max="12" value="0" data-act="eq-mid" orient="vertical"></div>
+      <div><label>HI</label><input type="range" min="-12" max="12" value="0" data-act="eq-hi" orient="vertical"></div>
+    </div>
+  </div>
+</div>
+
+<div class="xbar"><span>A</span><input type="range" min="0" max="100" value="50" id="xfader"><span>B</span></div>
+<div class="fx">
+  <span class="fxt">FX</span>
+  <button class="fxb" data-fx="filter">Filter</button>
+  <span class="fs">freq<input type="range" min="50" max="18000" value="2000" step="10" id="fxFreq"></span>
+  <span class="fs">res<input type="range" min="1" max="20" value="3" step="0.5" id="fxRes"></span>
+  <button class="fxb" data-fx="delay">Delay</button>
+  <span class="fs">time<input type="range" min="0.05" max="0.5" value="0.25" step="0.01" id="fxDlyT"></span>
+  <span class="fs">fbk<input type="range" min="0" max="0.8" value="0.35" step="0.05" id="fxDlyF"></span>
+  <button class="fxb" data-fx="reverb">Reverb</button>
+  <span class="fs">mix<input type="range" min="0" max="0.8" value="0.25" step="0.05" id="fxRevM"></span>
+</div>
+<div class="bot">
+  <button id="syncBtn">SYNC B→A</button>
+  <div class="mas">
+    <label>Master</label>
+    <input type="range" min="0" max="100" value="80" id="masterVol">
+  </div>
+  <div id="vu"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+</div>
+<div id="err"></div>
+
+<script>
+// ═══ DJFY v3 — Lite Edition for low-memory devices ═══
+(function(){
+'use strict';
+
+window.onerror = function(msg, url, line) {
+  var e = document.getElementById('err');
+  e.style.display = 'block';
+  e.textContent += 'JS ERROR: ' + msg + ' line ' + line + '\n';
+  console.error('DJFY ERROR:', msg, 'line', line);
+};
+
+console.log('DJFY v3 boot — script start');
+
+var SAMPLE_RATE = 44100, BASE_BPM = 128, BARS = 4;
+var BEATS = BARS * 4, DUR = BEATS * 60 / BASE_BPM;
+var SAMPLES = Math.floor(SAMPLE_RATE * DUR);
+var BEAT_SAMP = Math.floor(SAMPLES / BEATS);
+var SIXTEENTH = Math.floor(BEAT_SAMP / 4);
+
+var AC=null, masterGain=null, xGainA=null, xGainB=null;
+var fxFilter=null, delayNode=null, delayFbk=null, delayWet=null, revNode=null, revWet=null, fxDry=null;
+var patterns=[], decks={A:null,B:null}, currentPat=0;
+
+function osc(freq,t,shape){
+  var p=(t*freq)%1;
+  switch(shape){
+    case'saw':return(p*2-1)*0.5;
+    case'square':return p<0.5?0.5:-0.5;
+    default:return Math.sin(2*Math.PI*freq*t);
+  }
+}
+
+function nz(seed){
+  var s=Math.sin(seed*127.1+311.7)*43758.5453;
+  return s-Math.floor(s);
+}
+
+function env(t,a,d,s,r){
+  if(t<a)return t/a;
+  if(t<a+d)return 1-(1-s)*((t-a)/d);
+  if(t<a+d+r)return s*(1-(t-a-d)/r);
+  return 0;
+}
+
+function synthKick(t){
+  var f=150*Math.exp(-t*25)+45;
+  var body=osc(f,t,'sine')*Math.exp(-t*5);
+  var click=osc(1200,t,'sine')*Math.exp(-t*100)*0.4;
+  return(body*0.9+click)*env(t,0.002,0.35,0,0.1);
+}
+
+function synthHat(t,open){
+  if(open){return(nz(t*44100+500)*2-1)*Math.exp(-t*14)*0.25;}
+  return(nz(t*44100+100)*2-1)*Math.exp(-t*60)*0.2;
+}
+
+function synthSnare(t){
+  var n=(nz(t*44100+1000)*2-1)*Math.exp(-t*20)*0.5;
+  var tone=osc(180,t,'sine')*Math.exp(-t*15)*0.5;
+  return(n+tone)*env(t,0.003,0.12,0,0.08);
+}
+
+function synthBass(t,freq){
+  var saw=osc(freq,t,'saw')*0.4;
+  var sub=osc(freq*0.5,t,'sine')*0.4;
+  var filt=1-Math.exp(-t*30);
+  return(saw+sub)*filt*env(t,0.01,0.1,0.7,0.3);
+}
+
+function synthPad(t,freq){
+  var a=osc(freq,t,'saw')*0.18;
+  var b=osc(freq*1.007,t,'saw')*0.15;
+  var c=osc(freq*2,t,'sine')*0.08;
+  return(a+b+c)*env(t,0.15,0.4,0.7,0.8);
+}
+
+function genKick(i,t){
+  var s=0;
+  for(var b=0;b<BEATS;b++){
+    var off=b*BEAT_SAMP; var loc=i-off;
+    if(loc>=0&&loc<SIXTEENTH*2){ s+=synthKick(loc/SAMPLE_RATE); }
+  }
+  return s;
+}
+
+function genHat(i,t){
+  var s=0;
+  for(var st=0;st<BEATS*4;st++){
+    var off=st*SIXTEENTH; var loc=i-off;
+    var isOpen=(st%8===3||st%8===7);
+    if(loc>=0&&loc<Math.floor(SAMPLE_RATE*0.08)){
+      if(st%2===0||isOpen){ s+=synthHat(loc/SAMPLE_RATE,isOpen); }
+    }
+  }
+  return s;
+}
+
+function genSnare(i,t){
+  var s=0;
+  for(var b=1;b<BEATS;b+=2){
+    var off=b*BEAT_SAMP; var loc=i-off;
+    if(loc>=0&&loc<Math.floor(SAMPLE_RATE*0.3)){ s+=synthSnare(loc/SAMPLE_RATE); }
+  }
+  return s;
+}
+
+function genBass(i,t){
+  var notes=[55,55,55,55,49,49,55,55,41.2,41.2,49,49,55,49,41.2,55];
+  var s=0;
+  for(var b=0;b<BEATS;b++){
+    var off=b*BEAT_SAMP; var loc=i-off;
+    if(loc>=0&&loc<BEAT_SAMP){ s+=synthBass(loc/SAMPLE_RATE,notes[b]); }
+  }
+  return s;
+}
+
+function genPad(i,t){
+  var chords=[220,220,261.6,261.6,196,196,220,220,164.8,164.8,196,196,220,196,164.8,220];
+  var s=0;
+  for(var b=0;b<BEATS;b++){
+    var off=b*BEAT_SAMP; var loc=i-off;
+    if(loc>=0&&loc<BEAT_SAMP*2){ s+=synthPad(loc/SAMPLE_RATE,chords[b]); }
+  }
+  return s;
+}
+
+function renderPattern(genFn){
+  console.log('DJFY: rendering pattern...');
+  var buf=AC.createBuffer(1,SAMPLES,SAMPLE_RATE);
+  var data=buf.getChannelData(0);
+  for(var i=0;i<SAMPLES;i++){ data[i]=genFn(i,i/SAMPLE_RATE); }
+  var peak=0;
+  for(var j=0;j<SAMPLES;j++){ var a=Math.abs(data[j]); if(a>peak)peak=a; }
+  if(peak>0.95){ var sc=0.9/peak; for(var k=0;k<SAMPLES;k++)data[k]*=sc; }
+  return buf;
+}
+
+function buildPatterns(){
+  console.log('DJFY: building all patterns...');
+  var gens=[genKick,genHat,genSnare,genBass,genPad];
+  for(var i=0;i<gens.length;i++){ patterns[i]=renderPattern(gens[i]); }
+  console.log('DJFY: patterns done:',patterns.length);
+}
+
+function buildMaster(){
+  xGainA=AC.createGain();xGainA.gain.value=0.7;
+  xGainB=AC.createGain();xGainB.gain.value=0.7;
+  var merge=AC.createGain();merge.gain.value=1;
+  xGainA.connect(merge);xGainB.connect(merge);
+
+  fxDry=AC.createGain();fxDry.gain.value=1;
+  merge.connect(fxDry);
+
+  fxFilter=AC.createBiquadFilter();
+  fxFilter.type='lowpass';fxFilter.frequency.value=2000;fxFilter.Q.value=3;
+  merge.connect(fxFilter);
+
+  delayNode=AC.createDelay(2);delayNode.delayTime.value=0.25;
+  delayFbk=AC.createGain();delayFbk.gain.value=0.4;
+  delayWet=AC.createGain();delayWet.gain.value=0;
+  fxFilter.connect(delayNode);delayNode.connect(delayFbk);
+  delayFbk.connect(delayNode);delayNode.connect(delayWet);
+  delayWet.connect(AC.destination);
+
+  var irLen=AC.sampleRate*1.2;
+  var ir=AC.createBuffer(2,irLen,AC.sampleRate);
+  for(var ch=0;ch<2;ch++){
+    var d=ir.getChannelData(ch);
+    for(var j=0;j<irLen;j++)d[j]=(Math.random()*2-1)*Math.exp(-j/(AC.sampleRate*0.6));
+  }
+  revNode=AC.createConvolver();revNode.buffer=ir;
+  revWet=AC.createGain();revWet.gain.value=0.25;
+  fxFilter.connect(revNode);revNode.connect(revWet);
+  revWet.connect(AC.destination);
+
+  masterGain=AC.createGain();masterGain.gain.value=0.8;
+  fxDry.connect(masterGain);masterGain.connect(AC.destination);
+  console.log('DJFY: master graph built');
+}
+
+function Deck(name){
+  this.name=name;
+  this.src=null;this.gain=null;this.eqLo=null;this.eqMid=null;this.eqHi=null;
+  this.playing=false;this.pitch=0;this.offset=0;this.startedAt=0;
+  this.pattern=currentPat;
+}
+
+Deck.prototype.build=function(){
+  this.kill();
+  this.src=AC.createBufferSource();
+  this.src.buffer=patterns[this.pattern];
+  this.src.loop=true;
+  this.src.playbackRate.value=1+this.pitch/100;
+  this.gain=AC.createGain();this.gain.gain.value=0.8;
+  this.eqLo=AC.createBiquadFilter();this.eqLo.type='lowshelf';this.eqLo.frequency.value=200;
+  this.eqMid=AC.createBiquadFilter();this.eqMid.type='peaking';this.eqMid.frequency.value=1000;this.eqMid.Q.value=1;
+  this.eqHi=AC.createBiquadFilter();this.eqHi.type='highshelf';this.eqHi.frequency.value=5000;
+  this.src.connect(this.gain);
+  this.gain.connect(this.eqLo);
+  this.eqLo.connect(this.eqMid);
+  this.eqMid.connect(this.eqHi);
+  var xfg=this.name==='A'?xGainA:xGainB;
+  this.eqHi.connect(xfg);
+};
+
+Deck.prototype.kill=function(){
+  if(this.src){try{this.src.stop();}catch(e){}this.src.disconnect();this.src=null;}
+  [this.gain,this.eqLo,this.eqMid,this.eqHi].forEach(function(n){if(n)n.disconnect();});
+};
+
+Deck.prototype.play=function(){this.build();this.src.start(0,this.offset);this.playing=true;this.startedAt=AC.currentTime-this.offset;};
+Deck.prototype.stop=function(){this.offset=0;this.kill();this.playing=false;};
+Deck.prototype.pause=function(){if(this.playing){this.offset=AC.currentTime-this.startedAt;this.kill();this.playing=false;}};
+Deck.prototype.setPitch=function(v){this.pitch=v;if(this.src)this.src.playbackRate.value=1+v/100;};
+Deck.prototype.setEQ=function(b,v){var n=b==='lo'?this.eqLo:b==='mid'?this.eqMid:this.eqHi;if(n)n.gain.value=v;};
+Deck.prototype.setPattern=function(idx){this.pattern=idx;var was=this.playing;if(was)this.pause();this.offset=0;if(was)this.play();};
+
+function setXFader(v){var t=v/100*Math.PI/2;xGainA.gain.value=Math.cos(t)*1.4;xGainB.gain.value=Math.sin(t)*1.4;}
+
+function syncB(){if(!decks.A||!decks.A.playing)return;
+  var rt=decks.A.src?decks.A.src.playbackRate.value:1;
+  var beat=60/BASE_BPM;
+  var aTime=(AC.currentTime-decks.A.startedAt)*rt;
+  var target=Math.ceil(aTime/beat)*beat;
+  decks.B.pitch=(rt-1)*100;
+  decks.B.setPitch(decks.B.pitch);
+  document.querySelector('#deckB .pr input').value=decks.B.pitch;
+  document.getElementById('pB').textContent=decks.B.pitch.toFixed(1)+'%';
+  var was=decks.B.playing;if(was)decks.B.pause();
+  decks.B.offset=target%DUR;if(was)decks.B.play();
+}
+
+// ═══ UI wiring ═══
+function wireDeck(el){
+  var name=el.id==='deckA'?'A':'B';
+  el.addEventListener('click',function(e){
+    var btn=e.target.closest('button');if(!btn)return;
+    var d=decks[name];if(!d)return;
+    var act=btn.dataset.act;
+    if(act==='play'){if(d.playing){d.pause();el.classList.remove('ply');}else{d.play();el.classList.add('ply');}}
+    else if(act==='stop'){d.stop();el.classList.remove('ply');}
+    else if(act==='cue'){d.stop();setTimeout(function(){d.play();el.classList.add('ply');},50);}
+  });
+  el.addEventListener('input',function(e){
+    var s=e.target.closest('input[type="range"]');if(!s)return;
+    var d=decks[name];if(!d)return;
+    var v=parseFloat(s.value);
+    switch(s.dataset.act){
+      case'pitch':d.setPitch(v);document.getElementById('p'+name).textContent=v.toFixed(1)+'%';break;
+      case'eq-lo':d.setEQ('lo',v);break;
+      case'eq-mid':d.setEQ('mid',v);break;
+      case'eq-hi':d.setEQ('hi',v);break;
+    }
+  });
+}
+document.querySelectorAll('.deck').forEach(wireDeck);
+document.getElementById('xfader').addEventListener('input',function(e){setXFader(parseFloat(e.target.value));});
+document.getElementById('masterVol').addEventListener('input',function(e){if(masterGain)masterGain.gain.value=e.target.value/100;});
+document.getElementById('syncBtn').addEventListener('click',syncB);
+
+document.querySelectorAll('.pb').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.pb').forEach(function(b){b.classList.remove('sel');});
+    btn.classList.add('sel');
+    currentPat=parseInt(btn.dataset.pat);
+    if(decks.A)decks.A.setPattern(currentPat);
+    if(decks.B)decks.B.setPattern(currentPat);
+  });
+});
+
+document.querySelectorAll('.fxb').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    btn.classList.toggle('on');
+    var fx=btn.dataset.fx;
+    if(fx==='filter')fxFilter.frequency.value=btn.classList.contains('on')?parseFloat(document.getElementById('fxFreq').value):20000;
+    if(fx==='delay')delayWet.gain.value=btn.classList.contains('on')?0.5:0;
+    if(fx==='reverb')revWet.gain.value=btn.classList.contains('on')?parseFloat(document.getElementById('fxRevM').value):0;
+  });
+});
+document.getElementById('fxFreq').addEventListener('input',function(e){fxFilter.frequency.value=parseFloat(e.target.value);});
+document.getElementById('fxRes').addEventListener('input',function(e){fxFilter.Q.value=parseFloat(e.target.value);});
+document.getElementById('fxDlyT').addEventListener('input',function(e){delayNode.delayTime.value=parseFloat(e.target.value);});
+document.getElementById('fxDlyF').addEventListener('input',function(e){delayFbk.gain.value=parseFloat(e.target.value);});
+document.getElementById('fxRevM').addEventListener('input',function(e){revWet.gain.value=parseFloat(e.target.value);});
+
+// Tap BPM
+var taps=[];
+document.getElementById('tapBtn').addEventListener('click',function(){
+  taps.push(performance.now());if(taps.length>8)taps.shift();
+  if(taps.length>=3){
+    var ints=[];for(var i=1;i<taps.length;i++)ints.push(taps[i]-taps[i-1]);
+    var avg=ints.reduce(function(a,b){return a+b;},0)/ints.length;
+    document.getElementById('bpm').textContent=Math.round(60000/avg);
+  }
+});
+
+// VU meter
+function vuTick(){
+  var bars=document.querySelectorAll('#vu div'), max=6;
+  bars.forEach(function(b,i){b.style.background=i<max?'#00e5ff':'#1a1a30';});
+  max=(max+1)%9;
+}
+setInterval(vuTick,200);
+
+// ═══ Start ═══
+function start(){
+  var s=document.getElementById('splash'); if(s) s.classList.add('out');
+  console.log('Frequency: start() called, AC=',!!AC, 'state=', AC?AC.state:'none');
+  if(AC&&AC.state==='suspended'){AC.resume();console.log('DJFY: AC resumed');return;}
+  if(AC){console.log('DJFY: AC already running');return;}
+
+  try{
+    AC=new(window.AudioContext||window.webkitAudioContext)();
+    console.log('DJFY: AudioContext created, state='+AC.state+', rate='+AC.sampleRate);
+    buildPatterns();
+    buildMaster();
+    decks.A=new Deck('A');decks.B=new Deck('B');
+    decks.A.play();document.getElementById('deckA').classList.add('ply');
+    console.log('DJFY: ACTIVE — Deck A playing');
+  }catch(e){
+    console.error('DJFY INIT ERROR:',e.message);
+    var er=document.getElementById('err');
+    er.style.display='block';er.textContent='INIT ERROR: '+e.message;
+  }
+}
+
+document.addEventListener('touchstart',start,{passive:true});
+document.addEventListener('click',start,{passive:true});
+
+// Launch hint
+var hint=document.createElement('div');
+hint.textContent='TOCA PARA INICIAR';
+hint.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#00e5ff;color:#000;padding:14px 28px;border-radius:8px;font-weight:700;font-size:14px;z-index:100;pointer-events:none';
+document.body.appendChild(hint);
+setTimeout(function(){hint.style.opacity='0';},2500);
+setTimeout(function(){if(hint.parentNode)hint.parentNode.removeChild(hint);},3000);
+
+console.log('DJFY v3: init complete, awaiting tap');
+})();
+</script>
+</body>
+</html>

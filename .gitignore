@@ -1,0 +1,10 @@
+*.keystore
+*.jks
+*.p12
+build/
+obj/
+*.apk
+*.dex
+.DS_Store
+secrets/
+.env
