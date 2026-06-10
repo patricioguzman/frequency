@@ -54,8 +54,8 @@ public class MainActivity extends Activity {
             android.webkit.WebView.setWebContentsDebuggingEnabled(true);
         }
 
-        Log.i("DJFY", "Loading djfy.html...");
-        webView.loadUrl("file:///android_asset/djfy.html");
+        Log.i("DJFY", "Loading index.html...");
+        webView.loadUrl("file:///android_asset/index.html");
         setContentView(webView);
     }
 }

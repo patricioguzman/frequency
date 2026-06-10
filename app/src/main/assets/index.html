@@ -375,7 +375,7 @@ Deck.prototype.setPitch=function(v){this.pitch=v;if(this.src)this.src.playbackRa
 Deck.prototype.setEQ=function(b,v){var n=b==='lo'?this.eqLo:b==='mid'?this.eqMid:this.eqHi;if(n)n.gain.value=v;};
 Deck.prototype.setPattern=function(idx){this.pattern=idx;var was=this.playing;if(was)this.pause();this.offset=0;if(was)this.play();};
 
-function setXFader(v){var t=v/100*Math.PI/2;xGainA.gain.value=Math.cos(t)*1.4;xGainB.gain.value=Math.sin(t)*1.4;}
+function setXFader(v){if(!xGainA||!xGainB)return;var t=v/100*Math.PI/2;xGainA.gain.value=Math.cos(t)*1.4;xGainB.gain.value=Math.sin(t)*1.4;}
 
 function syncB(){if(!decks.A||!decks.A.playing)return;
   var rt=decks.A.src?decks.A.src.playbackRate.value:1;
@@ -463,9 +463,23 @@ function vuTick(){
 setInterval(vuTick,200);
 
 // ═══ Start ═══
+var _started=false;
 function start(){
-  var s=document.getElementById('splash'); if(s) s.classList.add('out');
-  console.log('Frequency: start() called, AC=',!!AC, 'state=', AC?AC.state:'none');
+  if(_started)return;_started=true;
+
+  console.log('Frequency: start() called');
+  var s=document.getElementById('splash');
+  if(s)s.classList.add('out');
+
+  // Remove hint if still visible
+  var h=document.querySelector('#hint-overlay');
+  if(h)h.remove();
+
+  // Defer heavy init so CSS transition runs
+  setTimeout(initAudio, 100);
+}
+
+function initAudio(){
   if(AC&&AC.state==='suspended'){AC.resume();console.log('DJFY: AC resumed');return;}
   if(AC){console.log('DJFY: AC already running');return;}
 
@@ -489,6 +503,7 @@ document.addEventListener('click',start,{passive:true});
 
 // Launch hint
 var hint=document.createElement('div');
+hint.id='hint-overlay';
 hint.textContent='TOCA PARA INICIAR';
 hint.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#00e5ff;color:#000;padding:14px 28px;border-radius:8px;font-weight:700;font-size:14px;z-index:100;pointer-events:none';
 document.body.appendChild(hint);
